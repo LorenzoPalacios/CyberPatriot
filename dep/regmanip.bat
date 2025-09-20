@@ -1,42 +1,11 @@
 @echo off
-
 setlocal
 
-rem - Exit Codes -
-set /a EXIT_SUCCESS=0
+rem - Dependencies -
+set err=".\dep\error.bat"
 
-set /a CMD_EXT_DISABLED=1
-
-set /a REG_BAD_KEY=2
-set /a REG_KEY_DOES_NOT_EXIST=3
-
-set /a FILE_BAD_NAME=4
-set /a FILE_DOES_NOT_EXIST=5
-
-rem - Driver Code -
-goto :init
-
-:main (
-  call :reg_export
-  exit /b %EXIT_SUCCESS%
-)
-
-:init (
-  call :enable_cmd_extensions
-  if %ERRORLEVEL% EQU %CMD_EXT_DISABLED% ( exit /b %CMD_EXT_DISABLED% )
-  goto :main
-)
-
-rem - Setup Routines -
-
-:enable_cmd_extensions (
-  verify other 2 > nul
-  setlocal enableextensions
-  IF %ERRORLEVEL% EQU 1 exit /b %CMD_EXT_DISABLED%
-  exit /b 0
-)
-
-rem - Registry Export/Import -
+call :%1
+call %err% FUNC_INVALID & exit /b %ERRORLEVEL%
 
 :reg_export (
   set tgt_key=%1
@@ -64,7 +33,7 @@ rem - Registry Export/Import -
 
   reg export "%tgt_key%" "%export_filename%"
   popd
-  exit /b %EXIT_SUCCESS%
+  call %err% EXIT_SUCCESS | exit /b
 )
 
 :reg_import (
@@ -75,7 +44,7 @@ rem - Registry Export/Import -
   call :check_filename %import_filename%
   if not %ERRORLEVEL% EQU %EXIT_SUCCESS% ( exit /b %ERRORLEVEL% )
   reg import %import_filename%
-  exit /b %EXIT_SUCCESS%
+  call %err% EXIT_SUCCESS | exit /b
 )
 
 rem - Utility -
@@ -83,7 +52,7 @@ rem - Utility -
 :check_filename (
   set filename=%1
   if not defined filename ( exit /b %FILE_BAD_NAME% )
-  exit /b %EXIT_SUCCESS%
+  call %err% EXIT_SUCCESS | exit /b
 )
 
 :check_registry_key (
@@ -91,5 +60,5 @@ rem - Utility -
   if not defined key ( exit /b %REG_BAD_KEY% )
   reg query %key% > nul
   if %ERRORLEVEL% EQU 1 ( exit /b %REG_KEY_DOES_NOT_EXIST% )
-  exit /b %EXIT_SUCCESS%
+  call %err% EXIT_SUCCESS | exit /b
 )
