@@ -2,34 +2,30 @@
 setlocal
 
 rem - Dependencies -
-set liberr=".\dep\error.bat"
-set libregmanip=".\dep\regmanip.bat"
+set lib_err=".\dep\error.bat"
+set lib_regmanip=".\dep\regmanip.bat"
+set lib_util=".\dep\util.bat"
 
 rem - Driver Code -
 goto :init
 
 :main (
-  call %libregmanip% reg_export
-  call %liberr% EXIT_SUCCESS & exit /b %ERRORLEVEL%
+  call %lib_regmanip% reg_export
+  echo Status: %ERRORLEVEL%
+  call %lib_err% SUCCESS
+  exit /b %ERRORLEVEL%
 )
 
 rem - Setup Routines -
 
 :init (
-  call :enable_cmd_extensions
+  call %lib_util% enable_cmd_extensions
   if not %ERRORLEVEL% EQU 0 exit /b %ERRORLEVEL%
   call :check_libraries
   goto :main
 )
 
 :check_libraries (
-  if not exist %liberr% echo init: Library %liberr% not found.
-  if not exist %libregmanip% echo init: Library %libregmanip% not found.
-)
-
-:enable_cmd_extensions (
-  verify other 2 > nul
-  setlocal enableextensions
-  IF %ERRORLEVEL% EQU 1 call %liberr% CMD_EXT_DISABLED & exit /b %ERRORLEVEL%
-  exit /b 0
+  if not exist %lib_err% echo init: Library %lib_err% not found.
+  if not exist %lib_regmanip% echo init: Library %lib_regmanip% not found.
 )
