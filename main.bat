@@ -1,7 +1,10 @@
 @echo off
-setlocal
+setlocal enableextensions
+setlocal enabledelayedexpansion
 
 rem - Dependencies -
+set libs="lib_err="".\lib\error.bat"", lib_regmanip="
+
 set lib_err=".\lib\error.bat"
 set lib_regmanip=".\lib\regmanip.bat"
 set lib_util=".\lib\util.bat"
@@ -11,17 +14,16 @@ goto :init
 
 :main (
   call %lib_regmanip% reg_export
-  echo Status: %ERRORLEVEL%
+  echo Status: !ERRORLEVEL!
   call %lib_err% SUCCESS
-  exit /b %ERRORLEVEL%
+  exit /b !ERRORLEVEL!
 )
 
 rem - Setup Routines -
 
 :init (
   call %lib_util% cmd_extensions_available
-  if not %ERRORLEVEL% EQU 0 exit /b %ERRORLEVEL%
-  setlocal enableextensions
+  if not %ERRORLEVEL% EQU 0 exit /b !ERRORLEVEL!
   call :check_libraries
   goto :main
 )

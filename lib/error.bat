@@ -1,7 +1,33 @@
 @echo off
-setlocal
 setlocal enabledelayedexpansion
 setlocal enableextensions
+
+rem Note:
+rem When calling this batch file for a status code, you MUST use !ERRORLEVEL!
+rem to access the returned status code.
+rem Regular expansion (%ERRORLEVEL%) and if-expansion (if ERRORLEVEL n) will NOT
+rem work.
+rem
+rem Dysfunctional Examples:
+rem call error.bat SUCCESS
+rem exit /b %ERRORLEVEL%
+rem - The above snippet will return whatever preceded `call` and set ERRORLEVEL.
+rem
+rem call error.bat FUNC_DNE
+rem if not ERRORLEVEL 0 ( echo Function does not exist. )
+rem - The above snippet is not guaranteed to emit any message.
+rem - This is because ERRORLEVEL functions identically to `%ERRORLEVEL%`.
+rem
+rem Working Examples:
+rem call error.bat SUCCESS
+rem exit /b !ERRORLEVEL!
+rem - The expansion of ERRORLEVEL is delayed until after the run-time retrieval
+rem - of `SUCCESS`.
+rem
+rem call error.bat CMD_EXT_DISABLED
+rem if not !ERRORLEVEL! EQU 0 ( echo Extensions are disabled. )
+rem - Again, the expansion of ERRORLEVEL is delayed until after retrieval, so
+rem - the message will be emitted.
 
 rem set /a ignores whitespace around the variable name and assignment.
 
@@ -21,7 +47,7 @@ set /a LIB_DNE          = 9
   if defined request (
     rem Check if the requested symbol is a variable local to this file and
     rem return its value.
-    if defined %request% exit /b !!request!!
+    if defined %request% ( exit /b !%request%! )
     rem Otherwise, assume it is a function.
     goto :%*
     exit /b %ERR_BAD_INVOKE%
@@ -37,6 +63,7 @@ rem %2 = Function Name
 rem %3 = Exception Message (optional)
 :exception_msg (
   set msg=%3
+  echo ^
   echo (Exception) Function %2 in file "%1"
   if defined msg echo %3
   exit /b
