@@ -2,9 +2,9 @@
 setlocal
 
 rem - Dependencies -
-set lib_err=".\dep\error.bat"
-set lib_regmanip=".\dep\regmanip.bat"
-set lib_util=".\dep\util.bat"
+set lib_err=".\lib\error.bat"
+set lib_regmanip=".\lib\regmanip.bat"
+set lib_util=".\lib\util.bat"
 
 rem - Driver Code -
 goto :init
@@ -19,8 +19,9 @@ goto :init
 rem - Setup Routines -
 
 :init (
-  call %lib_util% enable_cmd_extensions
+  call %lib_util% cmd_extensions_available
   if not %ERRORLEVEL% EQU 0 exit /b %ERRORLEVEL%
+  setlocal enableextensions
   call :check_libraries
   goto :main
 )

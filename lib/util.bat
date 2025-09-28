@@ -1,28 +1,31 @@
 @echo off
 setlocal
+setlocal enableextensions
+
+rem Get the directory this file is located in.
+set self_dir=%~dp0
+rem Remove the last backslash (\) from the self_dir.
+set lib_dir=%self_dir:~0,-1%
 
 rem - Dependencies -
-set lib_err=".\error.bat"
+set lib_err="%lib_dir%\error.bat"
 
 :dispatcher (
-  set tgt_lib=%1
-  set tgt_symbol=%2
+  set tgt_lib=%~f1
   if defined tgt_lib (
-    if defined tgt_symbol (
-      call %*
+    if exist %tgt_lib% (
+      rem Call the target library for the target symbol.
+      rem The first argument is the target library.
+      rem The second argument is the target symbol.
+      rem Any other arguments are assumed to be function parameters.
+      rem The target symbol can be a function or variable.
+      call :%*
       exit /b %ERRORLEVEL%
     )
     call %lib_err% LIB_DNE
-    exit %ERRORLEVEL%
+    exit /b %ERRORLEVEL%
   )
   call %lib_err% ERR_BAD_INVOKE
-  exit /b %ERRORLEVEL%
-)
-
-:driver (
-  set request=%1
-  if defined request call :%request%
-  call %lib_err% FUNC_DNE
   exit /b %ERRORLEVEL%
 )
 
@@ -52,7 +55,7 @@ set lib_err=".\error.bat"
   exit /b %ERRORLEVEL%
 )
 
-:enable_cmd_extensions (
+:cmd_extensions_available (
   verify other 2 > nul
   setlocal enableextensions
   IF %ERRORLEVEL% EQU 1 (

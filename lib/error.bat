@@ -18,9 +18,7 @@ set /a LIB_DNE          = 9
 
 :driver (
   set request=%1
-  echo !%request%!
   if defined request (
-    echo %request%
     if defined %request% exit /b !%request%!
     goto :%request%
     exit /b %ERR_BAD_INVOKE%

@@ -2,8 +2,12 @@
 setlocal
 setlocal enableextensions
 
+set self_dir=%~dp0
+set lib_dir=%self_dir:~0,-1%
+
 rem - Dependencies -
-set lib_err=".\error.bat"
+set lib_err="%lib_dir%\error.bat"
+set lib_util="%lib_dir%\util.bat"
 
 :driver (
   set request=%1
@@ -18,7 +22,7 @@ set lib_err=".\error.bat"
     if not defined tgt_key (
       set /p tgt_key="Key location (e.g. HKLM\Software\MyCo\MyApp): "
     )
-    call :check_registry_key %tgt_key%
+    call %lib_util% check_registry_key %tgt_key%
     if not %ERRORLEVEL% EQU 0 ( exit /b %ERRORLEVEL% )
   )
   (
