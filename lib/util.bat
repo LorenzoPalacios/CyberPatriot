@@ -10,22 +10,10 @@ set lib_dir=%self_dir:~0,-1%
 rem - Dependencies -
 set lib_err="%lib_dir%\error.bat"
 
-:dispatcher (
-  set tgt_lib=%~f1
-  if defined tgt_lib (
-    if exist %tgt_lib% (
-      rem Call the target library for the target symbol.
-      rem The first argument is the target library.
-      rem The second argument is the target symbol.
-      rem Any other arguments are assumed to be function parameters.
-      rem The target symbol can be a function or variable.
-      call :%*
-      exit /b %ERRORLEVEL%
-    )
-    call %lib_err% LIB_DNE
-    exit /b %ERRORLEVEL%
-  )
-  call %lib_err% ERR_BAD_INVOKE
+:dispatch (
+  set request=%1
+  if defined request goto :%*
+  call %lib_err% FUNC_DNE
   exit /b %ERRORLEVEL%
 )
 
@@ -43,12 +31,12 @@ set lib_err="%lib_dir%\error.bat"
   set key=%1
   if not defined key (
     call %lib_err% REG_BAD_KEY
-    echo crk: %ERRORLEVEL%
     exit /b %ERRORLEVEL%
   )
   reg query %key% > nul
   if %ERRORLEVEL% EQU 1 (
     call %lib_err% REG_KEY_DNE
+    echo %ERRORLEVEL%
     exit /b %ERRORLEVEL%
   )
   call %lib_err% SUCCESS

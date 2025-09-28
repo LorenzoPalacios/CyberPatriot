@@ -9,7 +9,7 @@ rem - Dependencies -
 set lib_err="%lib_dir%\error.bat"
 set lib_util="%lib_dir%\util.bat"
 
-:driver (
+:dispatch (
   set request=%1
   if defined request call :%request%
   call %lib_err% FUNC_DNE

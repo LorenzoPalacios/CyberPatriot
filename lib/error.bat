@@ -16,16 +16,20 @@ set /a VALUE_DNE        = 7
 set /a ERR_BAD_INVOKE   = 8
 set /a LIB_DNE          = 9
 
-:driver (
+:dispatch (
   set request=%1
   if defined request (
-    if defined %request% exit /b !%request%!
-    goto :%request%
+    rem Check if the requested symbol is a variable local to this file and
+    rem return its value.
+    if defined %request% exit /b !!request!!
+    rem Otherwise, assume it is a function.
+    goto :%*
     exit /b %ERR_BAD_INVOKE%
   )
-  call :exception_msg %0 driver "Attempt to invoke non-existent object."
+  call :exception_msg %~nx0 driver "Attempt to invoke non-existent object."
   exit /b %ERR_BAD_INVOKE%
 )
+
 
 rem Parameters:
 rem %1 = Filename
