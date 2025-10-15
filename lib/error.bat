@@ -41,6 +41,7 @@ set /a FUNC_DNE         = 6
 set /a VALUE_DNE        = 7
 set /a ERR_BAD_INVOKE   = 8
 set /a LIB_DNE          = 9
+set /a NO_VAR_NAME      = 10
 
 :dispatch (
   set request=%1
@@ -52,8 +53,8 @@ set /a LIB_DNE          = 9
     goto :%*
     exit /b %ERR_BAD_INVOKE%
   )
-  call :exception_msg %~nx0 driver "Attempt to invoke non-existent object."
-  exit /b %ERR_BAD_INVOKE%
+  call :exception %~nx0 driver "Attempt to invoke non-existent object." ERR_BAD_INVOKE
+  exit /b !ERRORLEVEL!
 )
 
 
@@ -61,10 +62,11 @@ rem Parameters:
 rem %1 = Filename
 rem %2 = Function Name
 rem %3 = Exception Message (optional)
-:exception_msg (
+rem %4 = Returned status code (optional, default is 0)
+:exception (
   set msg=%3
-  echo ^
+  echo ^ 
   echo (Exception) Function %2 in file "%1"
   if defined msg echo %3
-  exit /b
+  exit /b 0%4
 )

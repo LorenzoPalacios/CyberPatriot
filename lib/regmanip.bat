@@ -19,36 +19,18 @@ set lib_util="%lib_dir%\util.bat"
 )
 
 :reg_export (
-  (
-    set tgt_key=%1
-    if not defined tgt_key (
-      set /p tgt_key="Key location (e.g. HKLM\Software\MyCo\MyApp): "
-    )
-    call %lib_util% check_registry_key !tgt_key!
-    if not !ERRORLEVEL! EQU 0 ( exit /b !ERRORLEVEL! )
+  set tgt_key=%1
+  set export_dir=%2
+  set export_filename=%3
+  if not defined tgt_key (
+    set /p tgt_key="Key location (e.g. HKLM\Software\MyCo\MyApp): "
   )
-  (
-    set export_dir=%2
-    if not defined export_dir (
-      set /p export_dir="Save directory (e.g. %UserProfile%): "
-    )
-    call %lib_util% check_filename %export_dir%
-    if not !ERRORLEVEL! EQU 0 ( exit /b !ERRORLEVEL! )
-    pushd %export_dir%
-  )
-  (
-    set export_filename=%3
-    if not defined export_filename (
-      set /p export_filename="Save name (e.g. my_registry_key): "
-    )
-    call %lib_util% check_filename %export_filename%
-    if not !ERRORLEVEL! EQU 0 ( exit /b !ERRORLEVEL! )
-    set export_filename=%export_filename%.reg
-  )
-  reg export "%tgt_key%" "%export_filename%" 2> nul
-  popd
-  call %lib_err% SUCCESS
-  exit /b
+  call %lib_util% check_registry_key !tgt_key!
+  if not !ERRORLEVEL! EQU 0 ( exit /b !ERRORLEVEL! )
+  call %lib_util% save_file_prepper export_dir export_filename
+  if not !ERRORLEVEL! EQU 0 ( exit /b !ERRORLEVEL! )
+  call %lib_util% suppress_output reg export "%tgt_key%" "%export_filename%"
+  exit /b !ERRORLEVEL!
 )
 
 :reg_import (

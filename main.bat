@@ -3,8 +3,6 @@ setlocal enableextensions
 setlocal enabledelayedexpansion
 
 rem - Dependencies -
-set libs="lib_err="".\lib\error.bat"", lib_regmanip="
-
 set lib_err=".\lib\error.bat"
 set lib_regmanip=".\lib\regmanip.bat"
 set lib_util=".\lib\util.bat"
