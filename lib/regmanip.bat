@@ -29,7 +29,7 @@ set lib_util="%lib_dir%\util.bat"
   if not !ERRORLEVEL! EQU 0 ( exit /b !ERRORLEVEL! )
   call %lib_util% save_file_prepper export_dir export_filename
   if not !ERRORLEVEL! EQU 0 ( exit /b !ERRORLEVEL! )
-  call %lib_util% suppress_output reg export "%tgt_key%" "%export_filename%"
+  ( call %lib_util% suppress_output reg export "!tgt_key!" "!export_filename!" )
   exit /b !ERRORLEVEL!
 )
 
