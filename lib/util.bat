@@ -95,11 +95,14 @@ rem call %lib_util% save_file_prompt save_dir save_name
   )
   call :check_filename !sv_name_!
   if not !ERRORLEVEL! EQU 0 ( exit /b !ERRORLEVEL! )
-  @echo on
-  rem endlocal & setlocal & set sv_dir_=%sv_dir_% & set sv_name_=%sv_name_%
+  rem The parentheses surrounding the below line defer variable expansion until
+  rem execution reaches this point. This is necessary so that sv_dir_ and
+  rem sv_name_ can persist after endlocal, allowing us to modify the variables
+  rem specified by the caller.
+  ( endlocal & setlocal & set sv_dir_=%sv_dir_% & set sv_name_=%sv_name_% )
   rem %1 and %2 will still correspond to the save directory and save name
-  rem variables after endlocal.
-  set %1=!sv_dir_!
-  set %2=!sv_name_!
+  rem variable identifiers after endlocal.
+  set %1=%sv_dir_%
+  set %2=%sv_name_%
   exit /b
 )
