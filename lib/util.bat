@@ -15,15 +15,13 @@ set lib_err="%lib_dir%\error.bat"
   set request=%1
   if defined request (
     call :%*
-    echo - dispatch -
-    set e
     exit /b !ERRORLEVEL!
   )
   call %lib_err% FUNC_DNE
   exit /b !ERRORLEVEL!
 )
 
-:check_filename (
+:is_valid_filename (
   set filename=%~f1
   if not defined filename (
     call %lib_err% FILE_BAD_NAME
@@ -31,6 +29,15 @@ set lib_err="%lib_dir%\error.bat"
   )
   call %lib_err% SUCCESS
   exit /b !ERRORLEVEL!
+)
+
+:file_exists (
+  set filename=%~f1
+  if exist %filename% (
+    call %lib_err% SUCCESS
+    exit /b !ERRORLEVEL!
+  )
+  exit /b 1
 )
 
 :check_registry_key (
@@ -69,6 +76,22 @@ rem %* = The command to be run (%1), followed by its arguments, if any.
 )
 
 rem Parameters:
+rem %1 = The variable to which the directory will be stored.
+:directory_prompt (
+  set requested_dir=%1
+  if not defined requested_dir (
+    call %lib_err% exception_msg %self_filename% %0 "Variable identifier not specified." NO_IDENT
+  )
+
+  set /p sv_dir_="Enter a directory (e.g. %UserProfile%): "
+  call :is_valid_filename !requested_dir!
+  if not !ERRORLEVEL! EQU 0 ( exit /b !ERRORLEVEL! )
+  call :file_exists !requested_dir!
+  if not !ERRORLEVEL! EQU 0 ( mkdir !requested_dir! )
+
+)
+
+rem Parameters:
 rem %1 = callee save directory variable name
 rem %2 = callee save file variable name
 rem
@@ -80,22 +103,22 @@ rem call %lib_util% save_file_prompt save_dir save_name
   set sv_dir_=%1
   set sv_name_=%2
   if not defined sv_dir_ (
-    call %lib_err% exception_msg %self_filename% %0 "Identifier for save directory not specified." NO_VAR_NAME
+    call %lib_err% exception_msg %self_filename% %0 "Identifier for save directory not specified." NO_IDENT
   )
   if not defined sv_name_ (
-    call %lib_err% exception_msg %self_filename% %0 "Identifier for save name not specified." NO_VAR_NAME
+    call %lib_err% exception_msg %self_filename% %0 "Identifier for save name not specified." NO_IDENT
   )
 
   if not defined %sv_dir_% (
     set /p sv_dir_="Save directory (e.g. %UserProfile%): "
   )
-  call :check_filename !sv_dir_!
+  call :is_valid_filename !sv_dir_!
   if not !ERRORLEVEL! EQU 0 ( exit /b !ERRORLEVEL! )
 
   if not defined %sv_name_% (
     set /p sv_name_="Save name (e.g. savefile.sav): "
   )
-  call :check_filename !sv_name_!
+  call :is_valid_filename !sv_name_!
   if not !ERRORLEVEL! EQU 0 ( exit /b !ERRORLEVEL! )
   rem The parentheses surrounding the below line defer variable expansion until
   rem execution reaches this point. This is necessary so that sv_dir_ and

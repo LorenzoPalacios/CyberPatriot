@@ -41,7 +41,7 @@ set /a FUNC_DNE         = 6
 set /a VALUE_DNE        = 7
 set /a ERR_BAD_INVOKE   = 8
 set /a LIB_DNE          = 9
-set /a NO_VAR_NAME      = 10
+set /a NO_IDENT         = 10
 
 :dispatch (
   set request=%1
@@ -65,7 +65,7 @@ rem %3 = Exception Message (optional)
 rem %4 = Returned status code (optional, default is 0)
 :exception (
   set msg=%3
-  echo ^ 
+  echo ^
   echo (Exception) Function %2 in file "%1"
   if defined msg echo %3
   exit /b 0%4
