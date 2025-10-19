@@ -5,19 +5,14 @@ rem Gets the name of this batchfile (useful for exceptions).
 set self_filename=%~n0
 rem Gets the directory this file is located in.
 set self_dir=%~dp0
-rem Removes the last backslash (\) from the self_dir.
+rem Removes the last backslash (\) from self_dir.
 set lib_dir=%self_dir:~0,-1%
 
 rem - Dependencies -
 set lib_err="%lib_dir%\error.bat"
 
 :dispatch (
-  set request=%1
-  if defined request (
-    call :%*
-    exit /b !ERRORLEVEL!
-  )
-  call %lib_err% FUNC_DNE
+  call :%*
   exit /b !ERRORLEVEL!
 )
 

@@ -44,16 +44,7 @@ set /a LIB_DNE          = 9
 set /a NO_IDENT         = 10
 
 :dispatch (
-  set request=%1
-  if defined request (
-    rem Check if the requested symbol is a variable local to this file and
-    rem return its value.
-    if defined %request% ( exit /b !%request%! )
-    rem Otherwise, assume it is a function.
-    goto :%*
-    exit /b %ERR_BAD_INVOKE%
-  )
-  call :exception %~nx0 driver "Attempt to invoke non-existent object." ERR_BAD_INVOKE
+  call :%*
   exit /b !ERRORLEVEL!
 )
 

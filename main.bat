@@ -3,6 +3,7 @@ setlocal enableextensions
 setlocal enabledelayedexpansion
 
 rem - Dependencies -
+set lib_dispatch=".\lib\dispatch.bat"
 set lib_err=".\lib\error.bat"
 set lib_regmanip=".\lib\regmanip.bat"
 set lib_util=".\lib\util.bat"
@@ -11,9 +12,9 @@ rem - Driver Code -
 goto :init
 
 :main (
-  call %lib_regmanip% reg_export
+  call %lib_dispatch% var_dispatch %lib_regmanip% self_dir val
+  echo !val!
   echo Status: !ERRORLEVEL!
-  call %lib_err% SUCCESS
   exit /b !ERRORLEVEL!
 )
 
