@@ -19,13 +19,11 @@ rem The called function's returned value on success, -7 on dispatch failure.
   if !ERRORLEVEL! EQU 0 (
     call :func_exists %filename% %2
     if !ERRORLEVEL! EQU 0 (
-      set args=%*
-      set args=%args:%1=%
       rem The following endlocal allows the called function to access the
       rem caller's variable space. This is useful for functions that need to
       rem return multiple (or non-numerical) values to the caller.
       endlocal
-      call %filename% %args%
+      call %*
       exit /b !ERRORLEVEL!
     )
   )
@@ -51,6 +49,8 @@ rem 0 on success, -7 on dispatch failure.
   )
   exit /b -7
 )
+
+rem - Utility -
 
 rem Parameters:
 rem %1 - Filename
@@ -99,7 +99,6 @@ rem %3 - Storage variable.
     set _var=%%i
   )
   for /f "delims== tokens=1*" %%i in ( "!_var!" ) do ( set _var=%%j )
-  echo gvv: !_var!
   endlocal & set %3=!_var!
   exit /b 0
 )

@@ -1,113 +1,74 @@
 @echo off
 setlocal enableextensions
 
-rem Gets the name of this batchfile (useful for exceptions).
-set self_filename=%~n0
-rem Gets the directory this file is located in.
 set self_dir=%~dp0
-rem Removes the last backslash (\) from self_dir.
+set self_filename=%~n0
 set lib_dir=%self_dir:~0,-1%
 
-rem - Dependencies -
-set lib_err="%lib_dir%\error.bat"
+rem - Status Codes -
+set /a SUCCESS          = 0
+set /a CMD_EXT_DISABLED = 1
+set /a BAD_FILENAME     = 2
+set /a NO_STORAGE_VAR   = 3
 
 :dispatch (
+  endlocal
   call :%*
   exit /b !ERRORLEVEL!
 )
 
 :is_valid_filename (
-  set filename=%~f1
-  if not defined filename (
-    call %lib_err% FILE_BAD_NAME
-    exit /b !ERRORLEVEL!
-  )
-  call %lib_err% SUCCESS
-  exit /b !ERRORLEVEL!
+  set filename="%~f1"
+  if not defined filename ( exit /b %BAD_FILENAME% )
+  exit /b %SUCCESS%
 )
 
 :file_exists (
-  set filename=%~f1
-  if exist %filename% (
-    call %lib_err% SUCCESS
-    exit /b !ERRORLEVEL!
-  )
+  set filename="%~f1"
+  if exist %filename% ( exit /b %SUCCESS% )
   exit /b 1
-)
-
-:check_registry_key (
-  set key=%1
-  if not defined key (
-    call %lib_err% REG_BAD_KEY
-    exit /b !ERRORLEVEL!
-  )
-  call :suppress_output reg query %key%
-  if !ERRORLEVEL! EQU 1 (
-    call %lib_err% REG_KEY_DNE
-    exit /b !ERRORLEVEL!
-  )
-  call %lib_err% SUCCESS
-  exit /b !ERRORLEVEL!
 )
 
 :cmd_extensions_available (
   verify other 2> nul
   setlocal enableextensions
-  IF ERRORLEVEL 1 (
-    call %lib_err% CMD_EXT_DISABLED
-    exit /b !ERRORLEVEL!
-  )
-  call %lib_err% SUCCESS
-  exit /b !ERRORLEVEL!
+  IF ERRORLEVEL 1 ( exit /b !CMD_EXT_DISABLED! )
+  exit /b %SUCCESS%
 )
 
 rem This routine suppresses all output of a command and returns its ERRORLEVEL
 rem upon completion.
 rem Parameters:
-rem %* = The command to be run (%1), followed by its arguments, if any.
-:suppress_output (
-  %* 1> nul 2>&1
-  exit /b %ERRORLEVEL%
+rem %* - The command to be run (%1), followed by its arguments, if any.
+:no_output (
+  ( %* ) 1> nul 2>&1
+  exit /b !ERRORLEVEL!
 )
 
 rem Parameters:
-rem %1 = The variable to which the directory will be stored.
+rem %1 - The variable to which the directory will be stored.
 :directory_prompt (
   set requested_dir=%1
-  if not defined requested_dir (
-    call %lib_err% exception_msg %self_filename% %0 "Variable identifier not specified." NO_IDENT
-  )
-
-  set /p sv_dir_="Enter a directory (e.g. %UserProfile%): "
+  if not defined requested_dir ( exit /b %NO_STORAGE_VAR% )
+  set /p requested_dir="Enter a directory (e.g. %UserProfile%): "
   call :is_valid_filename !requested_dir!
   if not !ERRORLEVEL! EQU 0 ( exit /b !ERRORLEVEL! )
-  call :file_exists !requested_dir!
-  if not !ERRORLEVEL! EQU 0 ( mkdir !requested_dir! )
-
+  if !requested_dir:~-1!=="\" ( set requested_dir=!requested_dir:~0,-1! )
+  endlocal & set %1=%requested_dir%
+  exit /b %SUCCESS%
 )
 
 rem Parameters:
-rem %1 = callee save directory variable name
-rem %2 = callee save file variable name
-rem
-rem Example usage (from outside this batchfile):
-rem set save_dir="%USERPROFILE%\saves"
-rem set save_name="save.sav"
-rem call %lib_util% save_file_prompt save_dir save_name
-:save_file_prepper (
+rem %1 - Directory variable identifier
+rem %2 - Filename variable identifier
+:save_file_prompt (
   set sv_dir_=%1
   set sv_name_=%2
-  if not defined sv_dir_ (
-    call %lib_err% exception_msg %self_filename% %0 "Identifier for save directory not specified." NO_IDENT
-  )
-  if not defined sv_name_ (
-    call %lib_err% exception_msg %self_filename% %0 "Identifier for save name not specified." NO_IDENT
-  )
+  if not defined sv_dir_ ( exit /b %NO_IDENT% )
+  if not defined sv_name_ ( exit /b %NO_IDENT% )
 
-  if not defined %sv_dir_% (
-    set /p sv_dir_="Save directory (e.g. %UserProfile%): "
-  )
-  call :is_valid_filename !sv_dir_!
+  call :directory_prompt sv_dir_
+  call :is_valid_filename %sv_dir_%
   if not !ERRORLEVEL! EQU 0 ( exit /b !ERRORLEVEL! )
 
   if not defined %sv_name_% (
@@ -115,14 +76,6 @@ rem call %lib_util% save_file_prompt save_dir save_name
   )
   call :is_valid_filename !sv_name_!
   if not !ERRORLEVEL! EQU 0 ( exit /b !ERRORLEVEL! )
-  rem The parentheses surrounding the below line defer variable expansion until
-  rem execution reaches this point. This is necessary so that sv_dir_ and
-  rem sv_name_ can be replaced during parsing, but before the execution of endlocal,
-  rem allowing us to enter the caller's variable space to modify the specified
-  rem variables.
-  rem
-  rem %1 and %2 will still correspond to the save directory and save name
-  rem identifiers after endlocal.
-  ( endlocal & set %1=%sv_dir_% & set %2=%sv_name_% )
-  exit /b
+  endlocal & (set %1=%sv_dir_%) & (set %2=%sv_name_%)
+  exit /b %SUCCESS%
 )
