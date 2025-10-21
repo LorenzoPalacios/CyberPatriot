@@ -4,7 +4,6 @@ setlocal enabledelayedexpansion
 
 rem - Dependencies -
 set lib_dispatch=".\lib\dispatch.bat"
-set lib_err=".\lib\error.bat"
 set lib_regmanip=".\lib\regmanip.bat"
 set lib_util=".\lib\util.bat"
 
@@ -12,7 +11,7 @@ rem - Driver Code -
 goto :init
 
 :main (
-  call %lib_dispatch% var_dispatch %lib_regmanip% self_dir val
+  call %lib_dispatch% func_dispatch %lib_regmanip% reg_export
   echo !val!
   echo Status: !ERRORLEVEL!
   exit /b !ERRORLEVEL!
@@ -28,6 +27,7 @@ rem - Setup Routines -
 )
 
 :check_libraries (
-  if not exist %lib_err% echo init: Library %lib_err% not found.
+  if not exist %lib_dispatch% echo init: Library %lib_dispatch% not found.
   if not exist %lib_regmanip% echo init: Library %lib_regmanip% not found.
+  if not exist %lib_util%     echo init: Library %lib_regmanip% not found.
 )
