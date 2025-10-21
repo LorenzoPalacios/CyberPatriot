@@ -1,5 +1,6 @@
 @echo off
 setlocal enableextensions
+setlocal enabledelayedexpansion
 
 set self_dir=%~dp0
 set self_filename=%~n0

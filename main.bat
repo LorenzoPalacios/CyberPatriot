@@ -5,15 +5,28 @@ setlocal enabledelayedexpansion
 rem - Dependencies -
 set lib_dispatch=".\lib\dispatch.bat"
 set lib_regmanip=".\lib\regmanip.bat"
+set lib_user=".\lib\user.bat"
 set lib_util=".\lib\util.bat"
 
 rem - Driver Code -
+
 goto :init
 
+:user_mgmt_prompt (
+  set options=^
+    Delete User,^
+    Save Registry State,
+  
+  set options=%options:  =%
+  echo %options%
+  exit /b
+  for /l "tokens=1 delims=," %%i in ("!options!") do (
+
+  )
+)
+
 :main (
-  call %lib_dispatch% func_dispatch %lib_regmanip% reg_export
-  echo !val!
-  echo Status: !ERRORLEVEL!
+  call :user_mgmt_prompt
   exit /b !ERRORLEVEL!
 )
 
