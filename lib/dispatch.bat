@@ -1,53 +1,51 @@
 @echo off
+endlocal
 setlocal enableextensions
 
 :dispatch_internal (
-  endlocal
-  call :%*
-  exit /b !ERRORLEVEL!
-)
-
-rem Parameters:
-rem %1 is the target filename.
-rem %2 is the target function.
-rem %3, %4, %5 ... are the arguments to the target function (if applicable).
-rem Returns:
-rem The called function's returned value on success, -7 on dispatch failure.
-:func_dispatch (
   set filename="%~f1"
+  set tgt_sym="%~2"
   call :chk_filename %filename%
   if !ERRORLEVEL! EQU 0 (
-    call :func_exists %filename% %2
+    call :func_exists %filename% %tgt_sym%
     if !ERRORLEVEL! EQU 0 (
-      rem The following endlocal allows the called function to access the
-      rem caller's variable space. This is useful for functions that need to
-      rem return multiple (or non-numerical) values to the caller.
-      endlocal
-      call %*
+      call :func_dispatch %*
+      exit /b !ERRORLEVEL!
+    )
+    call :var_exists %filename% %tgt_sym%
+    if !ERRORLEVEL! EQU 0 (
+      call :var_dispatch %*
       exit /b !ERRORLEVEL!
     )
   )
   exit /b -7
+)
+
+rem Parameters:
+rem %1 - Target filename.
+rem %2 - Target function.
+rem %3, %4, %5 ... - Arguments to the target function (if applicable).
+rem Returns:
+rem The called function's returned value.
+:func_dispatch (
+  set filename="%~f1"
+  rem The following endlocal allows the called function to access the
+  rem caller's variable space. This is useful for functions that need to
+  rem return multiple (or non-numerical) values to the caller.
+  endlocal
+  call %*
+  exit /b !ERRORLEVEL!
 )
 
 rem Parameters:
 rem %1 - Filename.
 rem %2 - Target variable.
 rem %3 - Storage variable.
-rem Returns:
-rem 0 on success, -7 on dispatch failure.
 :var_dispatch (
   set filename="%~f1"
-  call :chk_filename %filename%
-  if !ERRORLEVEL! EQU 0 (
-    call :var_exists %filename% %2
-    if !ERRORLEVEL! EQU 0 (
-      endlocal
-      call :get_var_value "%~f1" %2 %3
-      exit /b !ERRORLEVEL!
-    )
-  )
-  exit /b -7
+  endlocal
+  call :get_var_value "%~f1" %2 %3
+  exit /b !ERRORLEVEL!
 )
 
 rem - Utility -
