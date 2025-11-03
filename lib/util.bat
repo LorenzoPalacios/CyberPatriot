@@ -17,9 +17,13 @@ set /a FILE_BAD_NAME    = 5
 
 :dispatch (
   call :%*
+  echo util: %save_dir%
+  echo util: %filename%
   exit /b !ERRORLEVEL!
 )
 
+rem Parameters:
+rem %1 - Filename to be checked for validity.
 :check_file (
   set filename="%~f1"
   if not defined filename ( exit /b %FILE_BAD_NAME% )

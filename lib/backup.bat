@@ -1,5 +1,4 @@
 @echo off
-endlocal
 setlocal enableextensions
 setlocal enabledelayedexpansion
 
@@ -40,9 +39,6 @@ set DEF_SDB="%SECURITY_DIR:"=%\database\secedit.sdb"
 
 rem - Service Constants -
 set SERV_REG_REPO="hklm\system\currentcontrolset\services"
-
-call :secpol_export
-exit /b 0
 
 :dispatch (
   call :%*
@@ -137,4 +133,30 @@ rem - Services -
 :backup_all_services (
   call :reg_export %SERV_REG_REPO%
   exit /b !ERRORLEVEL!
+)
+
+rem - Audit Policy -
+
+rem Parameters:
+rem %1 - Directory to save into (will prompt if not supplied).
+rem %2 - Filename of the save (will prompt if not supplied).
+:backup_auditpol (
+  set save_dir=%1
+  set filename=%2
+  call %lib_util% save_prompt save_dir filename
+  echo ba: !save_dir!
+  echo ba: !filename!
+  auditpol /backup /file:"%save_dir%%filename%"
+  exit /b %ERRORLEVEL%
+)
+
+rem Parameters:
+rem %1 - Path to the backup (will prompt if not supplied).
+:restore_auditpol (
+  set /p backup_path=Audit policy backup location:
+  if defined backup_path (
+    call %lib_dispatch% %lib_util% check_file %backup_path%
+    if !ERRORLEVEL! EQU 0 ( auditpol /restore /file:"%backup_path%" )
+  )
+  exit /b %ERRORLEVEL%
 )

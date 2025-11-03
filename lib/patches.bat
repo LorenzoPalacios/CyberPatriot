@@ -5,8 +5,12 @@ rem - Dependencies -
 set lib_dispatch=".\lib\dispatch.bat"
 set lib_util=".\lib\util.bat"
 
-set SC_BLACKLIST=RemoteRegistry TlntSvr TermService Spooler FTPSVC IISADMIN bthserv Fax mnmsrvc WerSvc cbdhsvc DiagTrack WinRM LanmanServer
-
+rem - Constants -
+set SC_BLACKLIST=RemoteRegistry TlntSvr TermService Spooler FTPSVC IISADMIN^
+                 bthserv Fax mnmsrvc WerSvc cbdhsvc DiagTrack WinRM LanmanServer^
+                 ftpsvc msftpsvc SharedAccess lmhosts upnphost WbioSrvc
+set WIN_UPD_REG_PATH="HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate"
+set AUTO_UPD_REG_PATH="%WIN_UPD_REG_PATH:~1,-1%\AU"
 :dispatch (
   call :%*
   exit /b !ERRORLEVEL!
@@ -22,6 +26,17 @@ set SC_BLACKLIST=RemoteRegistry TlntSvr TermService Spooler FTPSVC IISADMIN bths
 :sync_time (
   SystemSettingsAdminFlows ForceTimeSync 1
   exit /b %ERRORLEVEL%
+)
+
+:config_updates (
+  reg add %AUTO_UPD_REG_PATH% /v NoAutoUpdate /d 0 /f
+  reg add %AUTO_UPD_REG_PATH% /v AUOptions /d 3 /f
+  reg add %WIN_UPD_REG_PATH% /v SetAllowOptionalContent /d 0 /f
+  exit /b %ERRORLEVEL%
+)
+
+:config_auditpol (
+  auditpol /set /category:* /success:enable /failure:enable
 )
 
 rem Parameters:
