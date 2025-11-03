@@ -29,7 +29,7 @@ rem      or simply remove their account (will prompt if not supplied).
 
   if not defined should_erase (
     choice /m "Erase user data for %username%?"
-    if %ERRORLEVEL% EQU 1 
+    if %ERRORLEVEL% EQU 1
   )
   if not %should_erase% EQU 0 (
     rem TODO: get the user's SID to delete their registry keys
@@ -46,7 +46,7 @@ rem Parameters:
 rem %1 - The username to be checked.
 rem Returns 0 if the username corresponds to an account, 1 otherwise.
 :chk_username (
-  call %lib_dispatch% func_dispatch %lib_util% no_output net user "%~1"
+  call %lib_dispatch% %lib_util% no_output net user "%~1"
   if !ERRORLEVEL! EQU 0 ( exit /b 0 )
   exit /b 1
 )

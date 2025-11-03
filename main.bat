@@ -4,7 +4,8 @@ setlocal enabledelayedexpansion
 
 rem - Dependencies -
 set lib_dispatch=".\lib\dispatch.bat"
-set lib_regmanip=".\lib\regmanip.bat"
+set lib_patches=".\lib\patches.bat"
+set lib_savepol=".\lib\savepol.bat"
 set lib_user=".\lib\user.bat"
 set lib_util=".\lib\util.bat"
 
@@ -12,21 +13,8 @@ rem - Driver Code -
 
 goto :init
 
-:user_mgmt_prompt (
-  set options=^
-    Delete User,^
-    Save Registry State,
-  
-  set options=%options:  =%
-  echo %options%
-  exit /b
-  for /l "tokens=1 delims=," %%i in ("!options!") do (
-
-  )
-)
-
 :main (
-  call :user_mgmt_prompt
+  call %lib_dispatch% %lib_patches% disable_blacklisted_services
   exit /b !ERRORLEVEL!
 )
 
@@ -41,6 +29,6 @@ rem - Setup Routines -
 
 :check_libraries (
   if not exist %lib_dispatch% echo init: Library %lib_dispatch% not found.
-  if not exist %lib_regmanip% echo init: Library %lib_regmanip% not found.
-  if not exist %lib_util%     echo init: Library %lib_regmanip% not found.
+  if not exist %lib_savepol% echo init: Library %lib_savepol% not found.
+  if not exist %lib_util%     echo init: Library %lib_savepol% not found.
 )
