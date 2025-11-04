@@ -23,9 +23,28 @@ set AUTO_UPD_REG_PATH="%WIN_UPD_REG_PATH:~1,-1%\AU"
   exit /b %ERRORLEVEL%
 )
 
+:memory_hardening (
+  reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v ClearPageFileAtShutdown /d 1
+  reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v ExecuteOptions /d 1
+  reg add "HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" /v Enabled /d 1
+)
+
 :sync_time (
   SystemSettingsAdminFlows ForceTimeSync 1
   exit /b %ERRORLEVEL%
+)
+
+:network_and_sharing (
+  rem For private networks
+  SystemSettingsAdminFlows EnableNetworkDiscovery 2 0
+  SystemSettingsAdminFlows EnableNetworkFileSharing 2 0
+  rem For public networks
+  SystemSettingsAdminFlows EnableNetworkDiscovery 4 0
+  SystemSettingsAdminFlows EnableNetworkFileSharing 4 0
+
+  SystemSettingsAdminFlows EnablePublicFolderSharing 0
+  SystemSettingsAdminFlows SetFileSharingMinEncryption 0
+  SystemSettingsAdminFlows EnablePasswordProtection 1
 )
 
 :config_updates (
