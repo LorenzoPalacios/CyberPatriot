@@ -1,6 +1,4 @@
 @echo off
-endlocal
-setlocal enableextensions
 
 :dispatch_internal (
   set filename="%~f1"
@@ -8,6 +6,7 @@ setlocal enableextensions
   call :chk_filename %filename%
   if !ERRORLEVEL! EQU 0 (
     call :func_exists %filename% %tgt_sym%
+    echo "%1 | %2 | ERR: !ERRORLEVEL!"
     if !ERRORLEVEL! EQU 0 (
       call :func_dispatch %*
       exit /b !ERRORLEVEL!
@@ -29,10 +28,6 @@ rem Returns:
 rem The called function's returned value.
 :func_dispatch (
   set filename="%~f1"
-  rem The following endlocal allows the called function to access the
-  rem caller's variable space. This is useful for functions that need to
-  rem return multiple (or non-numerical) values to the caller.
-  endlocal
   call %*
   exit /b !ERRORLEVEL!
 )

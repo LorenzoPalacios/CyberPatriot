@@ -1,9 +1,11 @@
 @echo off
-setlocal enableextensions
+
+set self_dir=%~dp0
+set lib_dir=%self_dir:~0,-1%
 
 rem - Dependencies -
-set lib_dispatch=".\lib\dispatch.bat"
-set lib_util=".\lib\util.bat"
+set lib_dispatch="%lib_dir%\dispatch.bat"
+set lib_util="%lib_dir%\util.bat"
 
 rem - Constants -
 set SC_BLACKLIST=RemoteRegistry TlntSvr TermService Spooler FTPSVC IISADMIN^

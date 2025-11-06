@@ -21,7 +21,7 @@ goto :init
 rem - Setup Routines -
 
 :init (
-  call %lib_util% cmd_extensions_available
+  call %lib_dispatch% %lib_util% CMD_EXT_DISABLED
   if not %ERRORLEVEL% EQU 0 exit /b !ERRORLEVEL!
   call :check_libraries
   goto :main
@@ -29,6 +29,8 @@ rem - Setup Routines -
 
 :check_libraries (
   if not exist %lib_dispatch% echo init: Library %lib_dispatch% not found.
-  if not exist %lib_backup% echo init: Library %lib_backup% not found.
-  if not exist %lib_util%     echo init: Library %lib_backup% not found.
+  if not exist %lib_backup%   echo init: Library %lib_backup% not found.
+  if not exist %lib_util%     echo init: Library %lib_util% not found.
+  if not exist %lib_user%     echo init: Library %lib_user% not found.
+  if not exist %lib_patches%     echo init: Library %lib_patches% not found.
 )

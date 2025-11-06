@@ -1,11 +1,4 @@
 @echo off
-endlocal
-setlocal enableextensions
-setlocal enabledelayedexpansion
-
-set self_dir=%~dp0
-set self_filename=%~n0
-set lib_dir=%self_dir:~0,-1%
 
 rem - Status Codes -
 set /a SUCCESS          = 0
@@ -17,8 +10,6 @@ set /a FILE_BAD_NAME    = 5
 
 :dispatch (
   call :%*
-  echo util: %save_dir%
-  echo util: %filename%
   exit /b !ERRORLEVEL!
 )
 
@@ -64,7 +55,7 @@ rem %1 - The variable to which the directory will be stored.
   call :check_file %requested_dir%
   if !ERRORLEVEL! EQU %FILE_BAD_NAME% ( exit /b !ERRORLEVEL! )
   if !requested_dir:~-1!=="\" ( set requested_dir=!requested_dir:~0,-1! )
-  endlocal & set %1=%requested_dir%
+  set %1=%requested_dir%
   exit /b %SUCCESS%
 )
 
@@ -83,11 +74,9 @@ rem %2 - Filename variable identifier
   call :check_file %sv_dir_%
   if !ERRORLEVEL! EQU %FILE_BAD_NAME% ( exit /b !ERRORLEVEL! )
 
-  if not defined sv_name_ (
-    set /p sv_name_="Save name (e.g. savefile.sav): "
-  )
+  set /p sv_name_="Save name (e.g. savefile.sav): "
   call :check_file %sv_name_%
   if !ERRORLEVEL! EQU %FILE_BAD_NAME% ( exit /b !ERRORLEVEL! )
-  endlocal & (set %1=%sv_dir_%) & (set %2=%sv_name_%)
+  (set %1=%sv_dir_%) & (set %2=%sv_name_%)
   exit /b %SUCCESS%
 )

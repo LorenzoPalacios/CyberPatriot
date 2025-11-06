@@ -1,6 +1,4 @@
 @echo off
-setlocal enableextensions
-setlocal enabledelayedexpansion
 
 set self_dir=%~dp0
 set lib_dir=%self_dir:~0,-1%
@@ -15,27 +13,9 @@ set /a REG_BAD_KEY = 1
 set /a REG_KEY_DNE = 2
 set /a BAD_SDB     = 3
 
-rem - Security Area Flags -
-set /a SECURITY_POLICY = "1 << 0"
-set /a GROUP_MGMT      = "1 << 1"
-set /a USER_RIGHTS     = "1 << 2"
-set /a REGKEYS         = "1 << 3"
-set /a FILESTORE       = "1 << 4"
-set /a SERVICES        = "1 << 5"
-set /a ALL_SEC_AREAS   = "%SECURITY_POLICY% | %GROUP_MGMT% | %USER_RIGHTS% |"^
-                         "%REGKEYS% | %FILESTORE% | %SERVICES%"
-
-rem - Security Area Names -
-set SEC_AREA_1="SECURITY_POLICY"
-set SEC_AREA_2="GROUP_MGMT"
-set SEC_AREA_4="USER_RIGHTS"
-set SEC_AREA_8="REGKEYS"
-set SEC_AREA_16="FILESTORE"
-set SEC_AREA_32="SERVICES"
-
 rem - secedit constants -
 set SECURITY_DIR="%windir:"=%\security"
-set DEF_SDB="%SECURITY_DIR:"=%\database\secedit.sdb"
+set DEFAULT_SDB="%SECURITY_DIR:"=%\database\secedit.sdb"
 
 rem - Service Constants -
 set SERV_REG_REPO="hklm\system\currentcontrolset\services"
@@ -63,7 +43,9 @@ rem %3 - Export filename (will prompt if not given)
   call %lib_dispatch% %lib_util% save_prompt sv_dir sv_filename
   if not !ERRORLEVEL! EQU 0 ( exit /b !ERRORLEVEL! )
   rem Redirect only stderr to allow success messages through.
-  reg export "%key%" "!sv_dir!\%sv_filename%" 2> nul
+  reg export "%key%" "!sv_dir!\!sv_filename!"
+  rem 2> nul
+  echo !sv_dir!!sv_filename!
   exit /b !ERRORLEVEL!
 )
 
@@ -95,7 +77,7 @@ rem - Registry Status -
 rem - Secedit -
 
 rem Parameters:
-rem %1 - Target database (will prompt if not given)
+rem %1 - Target database (will assume system's current if not given)
 rem %2 - Export directory (will prompt if not given)
 rem %3 - Export filename (will prompt if not given)
 rem %4 - Security areas to export (defaults to all if not given)
@@ -104,27 +86,20 @@ rem %4 - Security areas to export (defaults to all if not given)
   set exp_dir=%2
   set exp_filename=%3
   set areas=%4
-  set areas_str=
-  if not defined sdb (
-    set /p sdb="Enter the location of a security database (e.g. %DEF_SDB%): "
+  if defined areas (
+    set areas_str=/areas %areas%
   )
-  call %lib_dispatch% %lib_util% check_file %sdb%
-  if not !ERRORLEVEL! EQU 3 ( exit /b %SECEDIT_BAD_SDB% )
+  if defined sdb (
+    call %lib_dispatch% %lib_util% check_file %sdb%
+    if not !ERRORLEVEL! EQU 3 ( exit /b %SECEDIT_BAD_SDB% )
+  )
   call %lib_dispatch% %lib_util% save_prompt exp_dir exp_filename
   if not !ERRORLEVEL! EQU 0 ( exit /b !ERRORLEVEL! )
-  if not defined sec_areas (
-    for /l %%i in (0,1,5) do (
-      set /a flag="1 << %%i"
-      set var1=SEC_AREA_!flag!
-      set var2=!var1!
-      set var3=!var2!
-      echo var1 = !var1!
-      echo var2 = !var2!
-      echo var3 = !var3!
-    )
-    exit /b
+
+  if not defined sdb (
+    secedit /export /cfg "%exp_dir%\%exp_filename%" %areas_str%
   )
-  secedit /export /db %sdb% /cfg "%exp_dir%\%exp_filename%" /areas %areas_str%
+  secedit /export /db %sdb% /cfg "%exp_dir%\%exp_filename%" %areas_str%
   exit /b !ERRORLEVEL!
 )
 
@@ -143,10 +118,9 @@ rem %2 - Filename of the save (will prompt if not supplied).
 :backup_auditpol (
   set save_dir=%1
   set filename=%2
-  call %lib_util% save_prompt save_dir filename
-  echo ba: !save_dir!
-  echo ba: !filename!
-  auditpol /backup /file:"%save_dir%%filename%"
+  call %lib_dispatch% %lib_util% save_prompt save_dir filename
+  echo "%save_dir%\%filename%"
+  auditpol /backup /file:"%save_dir%\%filename%"
   exit /b %ERRORLEVEL%
 )
 
