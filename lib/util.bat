@@ -1,7 +1,7 @@
 @echo off
+setlocal
 
 rem - Status Codes -
-set /a SUCCESS          = 0
 set /a CMD_EXT_DISABLED = 1
 set /a NO_STORAGE_VAR   = 2
 set /a FILE_EXISTS      = 3
@@ -9,6 +9,7 @@ set /a FILE_DNE         = 4
 set /a FILE_BAD_NAME    = 5
 
 :dispatch (
+  setlocal
   call :%*
   exit /b !ERRORLEVEL!
 )
@@ -56,7 +57,7 @@ rem %1 - The variable to which the directory will be stored.
   if !ERRORLEVEL! EQU %FILE_BAD_NAME% ( exit /b !ERRORLEVEL! )
   if !requested_dir:~-1!=="\" ( set requested_dir=!requested_dir:~0,-1! )
   set %1=%requested_dir%
-  exit /b %SUCCESS%
+  exit /b
 )
 
 rem Parameters:
@@ -78,5 +79,50 @@ rem %2 - Filename variable identifier
   call :check_file %sv_name_%
   if !ERRORLEVEL! EQU %FILE_BAD_NAME% ( exit /b !ERRORLEVEL! )
   (set %1=%sv_dir_%) & (set %2=%sv_name_%)
-  exit /b %SUCCESS%
+  exit /b
+)
+
+rem Parameters:
+rem %1 - Storage variable identifier
+rem %2, %3, %4 ... - Arguments
+:cnt_args (
+  rem cnt is set to -1 to account for %1.
+  set storage=%1
+  set cnt=-1
+  for %%i in ( %* ) do set /a cnt="cnt + 1"
+  set %1=%cnt%
+  exit /b
+)
+
+rem Parameters:
+rem %1 - Storage variable identifier
+rem %2 - String
+:strlen (
+  set str=%~2
+  set cnt=0
+  :str_len_loop (
+    if "%str%"=="" ( goto :str_len_loop_end )
+    set str=%str:~0,-1%
+    set /a cnt="cnt + 1"
+    goto :str_len_loop
+  )
+  :str_len_loop_end
+  set %1=%cnt%
+  exit /b
+)
+
+rem Parameters:
+rem %1 - Storage variable identifier
+rem %2, %3, %4 - Strings
+:highest_strlen (
+  set strings=%*
+  call :strlen svi_len %1
+  set strings=!strings:~%svi_len%!
+  set hi_len=0
+  for %%i in ( %strings% ) do (
+    call :strlen cur_len %%i
+    if !cur_len! GTR !hi_len! set hi_len=!cur_len!
+  )
+  set %1=!hi_len!
+  exit /b
 )

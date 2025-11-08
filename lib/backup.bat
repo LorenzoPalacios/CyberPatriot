@@ -17,7 +17,7 @@ set SECURITY_DIR="%windir:"=%\security"
 set DEFAULT_SDB="%SECURITY_DIR:"=%\database\secedit.sdb"
 
 rem - Service Constants -
-set SERV_REG_REPO="hklm\system\currentcontrolset\services"
+set SERVICES_REG_REPO="hklm\system\currentcontrolset\services"
 
 :dispatch (
   call :%*
@@ -30,7 +30,7 @@ rem Parameters:
 rem %1 - Target key (will prompt if not given)
 rem %2 - Export directory (will prompt if not given)
 rem %3 - Export filename (will prompt if not given)
-:reg_export (
+:reg_save (
   set key=%1
   set sv_dir=%2
   set sv_filename=%3
@@ -42,9 +42,9 @@ rem %3 - Export filename (will prompt if not given)
   call %lib_util% save_prompt sv_dir sv_filename
   if not !ERRORLEVEL! EQU 0 ( exit /b !ERRORLEVEL! )
   rem Redirect only stderr to allow success messages through.
-  reg export "%key%" "!sv_dir!\!sv_filename!"
+  reg save "%key%" "!sv_dir!\!sv_filename!"
+  echo "!key! | !sv_dir! | !sv_filename!"
   rem 2> nul
-  echo !sv_dir!!sv_filename!
   exit /b !ERRORLEVEL!
 )
 
@@ -58,8 +58,8 @@ rem %3 - Export filename (will prompt if not given)
     set /p import_path="Save location (e.g. %UserProfile%\my_registry_key.reg): "
   )
   call %lib_util% check_file !import_path!
-  if not !ERRORLEVEL! EQU 0 ( exit /b !ERRORLEVEL! )
-  reg import !import_path!
+  if not !ERRORLEVEL! EQU 3 ( exit /b !ERRORLEVEL! )
+  reg import !import_path! 2> nul
   exit /b %SUCCESS%
 )
 
@@ -80,32 +80,27 @@ rem %1 - Target database (will assume system's current if not given)
 rem %2 - Export directory (will prompt if not given)
 rem %3 - Export filename (will prompt if not given)
 rem %4 - Security areas to export (defaults to all if not given)
-:secpol_export (
+:backup_secpol (
   set sdb=%1
-  set exp_dir=%2
-  set exp_filename=%3
+  set out_dir=%2
+  set out_filename=%3
   set areas=%4
-  if defined areas (
-    set areas_str=/areas %areas%
-  )
+  if defined areas ( set areas_str=/areas %areas% )
   if defined sdb (
     call %lib_util% check_file %sdb%
     if not !ERRORLEVEL! EQU 3 ( exit /b %SECEDIT_BAD_SDB% )
+    set sdb_str=/db %sdb%
   )
-  call %lib_util% save_prompt exp_dir exp_filename
+  call %lib_util% save_prompt out_dir out_filename
   if not !ERRORLEVEL! EQU 0 ( exit /b !ERRORLEVEL! )
-
-  if not defined sdb (
-    secedit /export /cfg "%exp_dir%\%exp_filename%" %areas_str%
-  )
-  secedit /export /db %sdb% /cfg "%exp_dir%\%exp_filename%" %areas_str%
+  secedit /export %sdb_str% /cfg "%out_dir%\%out_filename%" %areas_str%
   exit /b !ERRORLEVEL!
 )
 
 rem - Services -
 
 :backup_all_services (
-  call :reg_export %SERV_REG_REPO%
+  call :reg_export %SERVICES_REG_REPO%
   exit /b !ERRORLEVEL!
 )
 
