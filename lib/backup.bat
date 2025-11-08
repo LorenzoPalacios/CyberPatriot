@@ -4,7 +4,6 @@ set self_dir=%~dp0
 set lib_dir=%self_dir:~0,-1%
 
 rem - Dependencies -
-set lib_dispatch="%lib_dir%\dispatch.bat"
 set lib_util="%lib_dir%\util.bat"
 
 rem - Status Codes -
@@ -40,7 +39,7 @@ rem %3 - Export filename (will prompt if not given)
   )
   call :check_registry_key %key%
   if not !ERRORLEVEL! EQU 0 ( exit /b !ERRORLEVEL! )
-  call %lib_dispatch% %lib_util% save_prompt sv_dir sv_filename
+  call %lib_util% save_prompt sv_dir sv_filename
   if not !ERRORLEVEL! EQU 0 ( exit /b !ERRORLEVEL! )
   rem Redirect only stderr to allow success messages through.
   reg export "%key%" "!sv_dir!\!sv_filename!"
@@ -69,7 +68,7 @@ rem - Registry Status -
 :check_registry_key (
   set key=%1
   if not defined key ( exit /b %REG_BAD_KEY% )
-  call %lib_dispatch% %lib_util% no_output reg query %key%
+  call %lib_util% no_output reg query %key%
   if not !ERRORLEVEL! EQU 0 ( exit /b %REG_KEY_DNE% )
   exit /b %SUCCESS%
 )
@@ -90,10 +89,10 @@ rem %4 - Security areas to export (defaults to all if not given)
     set areas_str=/areas %areas%
   )
   if defined sdb (
-    call %lib_dispatch% %lib_util% check_file %sdb%
+    call %lib_util% check_file %sdb%
     if not !ERRORLEVEL! EQU 3 ( exit /b %SECEDIT_BAD_SDB% )
   )
-  call %lib_dispatch% %lib_util% save_prompt exp_dir exp_filename
+  call %lib_util% save_prompt exp_dir exp_filename
   if not !ERRORLEVEL! EQU 0 ( exit /b !ERRORLEVEL! )
 
   if not defined sdb (
@@ -118,7 +117,7 @@ rem %2 - Filename of the save (will prompt if not supplied).
 :backup_auditpol (
   set save_dir=%1
   set filename=%2
-  call %lib_dispatch% %lib_util% save_prompt save_dir filename
+  call %lib_util% save_prompt save_dir filename
   echo "%save_dir%\%filename%"
   auditpol /backup /file:"%save_dir%\%filename%"
   exit /b %ERRORLEVEL%
@@ -129,7 +128,7 @@ rem %1 - Path to the backup (will prompt if not supplied).
 :restore_auditpol (
   set /p backup_path=Audit policy backup location:
   if defined backup_path (
-    call %lib_dispatch% %lib_util% check_file %backup_path%
+    call %lib_util% check_file %backup_path%
     if !ERRORLEVEL! EQU 0 ( auditpol /restore /file:"%backup_path%" )
   )
   exit /b %ERRORLEVEL%

@@ -4,7 +4,6 @@ set self_dir=%~dp0
 set lib_dir=%self_dir:~0,-1%
 
 rem - Dependencies -
-set lib_dispatch="%lib_dir%\dispatch.bat"
 set lib_util="%lib_dir%\util.bat"
 
 rem - Constants -

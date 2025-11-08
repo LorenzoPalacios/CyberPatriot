@@ -7,7 +7,6 @@ set self_filename=%~n0
 set lib_dir=%self_dir:~0,-1%
 
 rem - Dependencies -
-set lib_dispatch="%lib_dir%\dispatch.bat"
 set lib_util="%lib_dir%\util.bat"
 
 rem - Status Codes -
@@ -46,7 +45,7 @@ rem Parameters:
 rem %1 - The username to be checked.
 rem Returns 0 if the username corresponds to an account, 1 otherwise.
 :chk_username (
-  call %lib_dispatch% %lib_util% no_output net user "%~1"
+  call %lib_util% no_output net user "%~1"
   if !ERRORLEVEL! EQU 0 ( exit /b 0 )
   exit /b 1
 )
