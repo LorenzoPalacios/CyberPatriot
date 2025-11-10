@@ -1,6 +1,3 @@
-@echo off
-setlocal
-
 rem - Status Codes -
 set /a CMD_EXT_DISABLED = 1
 set /a NO_STORAGE_VAR   = 2
@@ -9,7 +6,6 @@ set /a FILE_DNE         = 4
 set /a FILE_BAD_NAME    = 5
 
 :dispatch (
-  setlocal
   call :%*
   exit /b !ERRORLEVEL!
 )
@@ -113,7 +109,7 @@ rem %2 - String
 
 rem Parameters:
 rem %1 - Storage variable identifier
-rem %2, %3, %4 - Strings
+rem %2, %3, %4 ... - Strings
 :highest_strlen (
   set strings=%*
   call :strlen svi_len %1
@@ -125,4 +121,24 @@ rem %2, %3, %4 - Strings
   )
   set %1=!hi_len!
   exit /b
+)
+
+rem Parameters:
+rem %1 - Number to be checked.
+rem %2 - Lower bound.
+rem %3 - Upper bound.
+rem %4 - Boolean flag determining whether or not the bounds are exclusive.
+rem      Default is false (that is, bounds are exclusive).
+:num_is_in_range (
+  set exclusive=0%4
+  if not %exclusive% EQU 0 (
+    if %1 GTR %2 (
+      if %1 LSS %3 exit /b 1
+    )
+  ) else (
+    if %1 GEQ %2 (
+      if %1 LEQ %3 exit /b 1
+    )
+  )
+  exit /b 0
 )

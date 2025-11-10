@@ -1,6 +1,4 @@
-@echo off
-setlocal enableextensions
-setlocal enabledelayedexpansion
+setlocal
 
 set self_dir=%~dp0
 set self_filename=%~n0

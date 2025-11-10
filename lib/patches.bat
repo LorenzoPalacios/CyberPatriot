@@ -1,4 +1,4 @@
-@echo off
+setlocal
 
 set self_dir=%~dp0
 set lib_dir=%self_dir:~0,-1%
