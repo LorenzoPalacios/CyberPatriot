@@ -1,3 +1,5 @@
 # File types
 *.reg
 *.hiv
+*.inf
+*.csv
