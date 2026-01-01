@@ -12,6 +12,7 @@ set SC_BLACKLIST=RemoteRegistry TlntSvr TermService Spooler FTPSVC IISADMIN^
                  ftpsvc msftpsvc SharedAccess lmhosts upnphost WbioSrvc
 set WIN_UPD_REG_PATH="HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate"
 set AUTO_UPD_REG_PATH="%WIN_UPD_REG_PATH:~1,-1%\AU"
+
 :dispatch (
   call :%*
   exit /b !ERRORLEVEL!
@@ -20,7 +21,7 @@ set AUTO_UPD_REG_PATH="%WIN_UPD_REG_PATH:~1,-1%\AU"
 :fix_corrupt_files (
   dism /online /cleanup-image /restorehealth
   rem Perform the scan in the background.
-  start sfc /scannow
+  start /min sfc /scannow
   exit /b %ERRORLEVEL%
 )
 

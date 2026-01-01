@@ -8,21 +8,19 @@ function Export-RegistryObject {
   $reg_arg_force = if ($Force) { '/y' }
   [string]$obj_name = (Get-Item -Path "$Path").Name
   [string]$save_name = "$Destination\" + $obj_name.Replace('\', '-') + '.hiv'
-  reg.exe save $obj_name $save_name $reg_arg_force
+  reg.exe save $obj_name $save_name $reg_arg_force > nul 2>&1
 }
 
 function Export-SecurityPolicy {
   param (
-    [Parameter(Mandatory)]
-    [string]$Destination
+    [string]$Destination = '.'
   )
-  SecEdit.exe /export /cfg "$Destination\secedit.inf"
+  SecEdit.exe /export /cfg "$Destination\secedit.inf" > nul 2>&1
 }
 
 function Export-Services() {
   param (
-    [Parameter(Mandatory)]
-    [string]$Destination
+    [string]$Destination = '.'
   )
   $servicesRegPath = 'HKLM:\SYSTEM\CurrentControlSet\Services'
   Export-RegistryObject -Path $servicesRegPath -Destination $Destination
@@ -30,8 +28,7 @@ function Export-Services() {
 
 function Export-AuditPolicy() {
   param (
-    [Parameter(Mandatory)]
-    [string]$Destination
+    [string]$Destination = '.'
   )
   $expFilename = 'auditpol.csv'
   # Todo: Enumerate an array of file objects instead of testing each candidate path

@@ -1,8 +1,10 @@
-$lib = '.\lib'
+$lib = "$PSScriptRoot\lib"
 $backupModule = "$lib\backup.psm1"
 $restoreModule = "$lib\restore.psm1"
+$userModule = "$lib\user.psm1"
 
 Import-Module -Name "$backupModule" -Function *
 Import-Module -Name "$restoreModule" -Function *
+Import-Module -Name "$userModule" -Function *
 
-Export-AuditPolicy -
+Add-User -Name efddt

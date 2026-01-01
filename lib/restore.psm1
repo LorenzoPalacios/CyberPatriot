@@ -1,4 +1,3 @@
-
 function Import-RegistryObject {
   param (
     [Parameter(Mandatory)]
@@ -20,4 +19,11 @@ function Import-AuditPolicy() {
   auditpol.exe /restore /file:"$Path"
 }
 
-Export-ModuleMember -Function *
+function Import-SecurityPolicy() {
+  param (
+    [Parameter(Mandatory)]
+    [string]$Path
+  )
+  [string]$localSDB = "$env:windir\security\database\secedit.sdb"
+  SecEdit.exe /import /db $localSDB /cfg $Path /quiet
+}
